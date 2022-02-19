@@ -16,7 +16,8 @@ resource "aws_iam_role" "ciem_member_account_role" {
 }
 
 resource "aws_iam_policy" "cloud_trail_access_policy" {
-  name = "ciem-cloudtrail-${var.tenant_id}"
+  count = var.enable_cloudtrail ? 1 : 0
+  name  = "ciem-cloudtrail-${var.tenant_id}"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -37,12 +38,14 @@ resource "aws_iam_policy" "cloud_trail_access_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "cloud_trail_access_policy" {
+  count      = var.enable_cloudtrail ? 1 : 0
   role       = aws_iam_role.ciem_member_account_role.name
   policy_arn = aws_iam_policy.cloud_trail_access_policy.arn
 }
 
 resource "aws_iam_policy" "controller_access_policy" {
-  name = "ciem-controller-${var.tenant_id}"
+  count = var.enable_controller ? 1 : 0
+  name  = "ciem-controller-${var.tenant_id}"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -76,6 +79,7 @@ resource "aws_iam_policy" "controller_access_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "controller_access_policy" {
+  count      = var.enable_controller ? 1 : 0
   role       = aws_iam_role.ciem_member_account_role.name
   policy_arn = aws_iam_policy.controller_access_policy.arn
 }
