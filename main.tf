@@ -3,13 +3,12 @@ data "aws_iam_policy" "security_audit" {
 }
 
 resource "aws_iam_role" "ciem_member_account_role" {
-  name = var.ciem_cloudtrail_account_role_name
+  name = var.ciem_member_account_role_name
   assume_role_policy = templatefile("${path.module}/template/oidc_assume_role_policy.json", {
     ACCOUNT_ID = var.oidc_provider_account_id,
     ROLE_NAME  = var.ciem_oidc_provider_role_name
   })
   managed_policy_arns = [
-    aws_iam_policy.cloud_trail_access_policy.arn,
     data.aws_iam_policy.security_audit.arn
   ]
   tags = {}
@@ -40,7 +39,7 @@ resource "aws_iam_policy" "cloud_trail_access_policy" {
 resource "aws_iam_role_policy_attachment" "cloud_trail_access_policy" {
   count      = var.enable_cloudtrail ? 1 : 0
   role       = aws_iam_role.ciem_member_account_role.name
-  policy_arn = aws_iam_policy.cloud_trail_access_policy.arn
+  policy_arn = aws_iam_policy.cloud_trail_access_policy[0].arn
 }
 
 resource "aws_iam_policy" "controller_access_policy" {
@@ -81,5 +80,5 @@ resource "aws_iam_policy" "controller_access_policy" {
 resource "aws_iam_role_policy_attachment" "controller_access_policy" {
   count      = var.enable_controller ? 1 : 0
   role       = aws_iam_role.ciem_member_account_role.name
-  policy_arn = aws_iam_policy.controller_access_policy.arn
+  policy_arn = aws_iam_policy.controller_access_policy[0].arn
 }
